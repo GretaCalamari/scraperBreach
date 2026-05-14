@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: scraperbreach
+    runtime: docker
+    plan: free
+    envVars:
+      - key: API_KEY
+        sync: false
+      - key: MIN_DELAY
+        value: "1.5"
+      - key: MAX_DELAY
+        value: "4.0"
