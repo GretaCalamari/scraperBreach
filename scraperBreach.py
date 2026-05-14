@@ -117,7 +117,12 @@ class StealthScraper:
             if response is None:
                 raise RuntimeError(f"Nessuna risposta da {url}")
 
-            # Cloudflare challenge — aspetta che la pagina si carichi davvero
+            # Aspetta che eventuali redirect JS (es. Cloudflare) si stabilizzino
+            try:
+                await page.wait_for_load_state("networkidle", timeout=10_000)
+            except Exception:
+                pass
+
             if await self._is_cloudflare_challenge(page):
                 await self._wait_cloudflare(page)
 
@@ -142,11 +147,11 @@ class StealthScraper:
         return {url: html for url, html in results if not isinstance(html, Exception)}
 
     async def _is_cloudflare_challenge(self, page: Page) -> bool:
-        title = await page.title()
-        return any(
-            k in title.lower()
-            for k in ("just a moment", "attention required", "ddos-guard")
-        )
+        try:
+            title = await page.title()
+            return any(k in title.lower() for k in ("just a moment", "attention required", "ddos-guard"))
+        except Exception:
+            return False
 
     async def _wait_cloudflare(self, page: Page, timeout: int = 20) -> None:
         """Attende che Cloudflare completi il challenge JS automatico."""
