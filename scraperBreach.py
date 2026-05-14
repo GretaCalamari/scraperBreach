@@ -149,7 +149,10 @@ class StealthScraper:
     async def _is_cloudflare_challenge(self, page: Page) -> bool:
         try:
             title = await page.title()
-            return any(k in title.lower() for k in ("just a moment", "attention required", "ddos-guard"))
+            return any(
+                k in title.lower()
+                for k in ("just a moment", "attention required", "ddos-guard")
+            )
         except Exception:
             return False
 
